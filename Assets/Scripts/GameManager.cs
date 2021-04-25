@@ -11,6 +11,8 @@ public class GameManager : MonoBehaviour
     public string[] rolls;
 
     public Sprite[] raceSprites;
+    public Sprite[] nums;
+    public Sprite[] backgrounds;
 
     public Button hPUp;
     public Button hPDown;
@@ -26,17 +28,24 @@ public class GameManager : MonoBehaviour
     public Button ethBeanUp;
     public Button ethBeanDown;
     public Button rollEvent;
+    public Button dismissEvent;
 
     public Text race;
     public Text height;
-    public Text currentTurnBox;
+    public Text turnInfo;
     public Text health;
     public Text speed;
     public Text gold;
     public Text ethBeans;
     public Text eventLog;
+    public Text eventDisplay;
+    public Text dismissEventText;
 
     public Image charSprite;
+    public Image turnInfoContainer;
+    public Image eventDisplayContainer;
+    public Image diceRollDisplay;
+    public Image background;
 
     public Dropdown stageList;
 
@@ -56,13 +65,18 @@ public class GameManager : MonoBehaviour
     string[] jungleEvents;
     string[] hellEvents;
 
-    int turn;
+    int turn = 3;
     int currentTurn = 1;
-    int totalPlayers;
+    int totalPlayers = 5;
+    int dieNumber;
+
+    bool eventTime = false;
 
     // Start is called before the first frame update
     void Start()
     {
+        setStagesEvents();
+
         int counter = 0;
         rolls = new string[10001];
         StringBuilder singleLine = new StringBuilder();
@@ -236,7 +250,7 @@ public class GameManager : MonoBehaviour
         race.text = raceStr;
     }
     
-    public void hpUp()
+    public void HpUp()
     {
         if (health.text != "")
         {
@@ -244,284 +258,243 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void hpDown()
+    public void HpDown()
     {
         if (health.text != "")
         {
             health.text = (int.Parse(health.text) - 1).ToString();
         }
     }
-    /*
-    public void endTurn(View view)
+    
+    public void EndTurn() { StartCoroutine("DisplayEndTurn"); }
+
+    IEnumerator DisplayEndTurn()
     {
-        Toast.makeText(getApplicationContext(), "Turn Ended Successfully!", Toast.LENGTH_LONG).show();
-        if (currentTurn == 1)
-            currentTurn = totalPlayers;
-        else
-            currentTurn--;
-        if (currentTurn == turn)
+        if (!eventTime)
         {
-            AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-            dialog.setMessage("It's your turn to roll the event!");
-            dialog.setTitle("Event Time!");
-            dialog.setPositiveButton("Okay..",
-                    new DialogInterface.OnClickListener()
-                    {
-                        public void onClick(DialogInterface dialog,
-                                            int which)
+            if (currentTurn == 1)
+                currentTurn = totalPlayers;
+            else
+                currentTurn--;
+            if (currentTurn == turn)
             {
-                //Toast.makeText(getApplicationContext(),"Yes is clicked",Toast.LENGTH_LONG).show();
+                turnInfoContainer.color = new Color32(24, 0, 63, 255);
+                turnInfo.text = "Event Time!";
+                eventTime = true;
             }
-        });
-        AlertDialog alertDialog = dialog.create();
-        alertDialog.show();
-    }
-    TextView currTurn = (TextView)findViewById(R.id.currentTurn);
-    currTurn.setText(Integer.toString(currentTurn));
-    }
-
-public void rollEvent(View view)
-{
-    Random rand = new Random();
-    Spinner stage = (Spinner)findViewById(R.id.stageSpinner);
-    String event = "";
-    switch (stage.getSelectedItem().toString())
-    {
-        case "Grassy Plains":
-                event = grassyEvents[rand.nextInt(grassyEvents.length)];
-            break;
-        case "Sandy Desert":
-                event = sandyEvents[rand.nextInt(sandyEvents.length)];
-            break;
-        case "Town Square":
-                event = townEvents[rand.nextInt(townEvents.length)];
-            break;
-        case "Beach Day":
-                event = beachEvents[rand.nextInt(beachEvents.length)];
-            break;
-        case "Enchanted Forest":
-                event = enchantedForestEvents[rand.nextInt(enchantedForestEvents.length)];
-            break;
-        case "Jungle":
-                event = jungleEvents[rand.nextInt(jungleEvents.length)];
-            break;
-        case "Volcano":
-                event = volcanoEvents[rand.nextInt(volcanoEvents.length)];
-            break;
-        case "Space Whale":
-                event = spaceWhaleEvents[rand.nextInt(spaceWhaleEvents.length)];
-            break;
-        case "Cave":
-                event = caveEvents[rand.nextInt(caveEvents.length)];
-            break;
-        case "Iceberg":
-                event = icebergEvents[rand.nextInt(icebergEvents.length)];
-            break;
-        case "Ocean":
-                event = oceanEvents[rand.nextInt(oceanEvents.length)];
-            break;
-        case "Atlantis":
-                event = atlantisEvents[rand.nextInt(atlantisEvents.length)];
-            break;
-        case "Kraken":
-                event = krakenEvents[rand.nextInt(krakenEvents.length)];
-            break;
-    }
-    AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-    dialog.setMessage(event);
-    dialog.setTitle(stage.getSelectedItem().toString());
-    dialog.setPositiveButton("Got It.",
-            new DialogInterface.OnClickListener()
+            else
             {
-                    public void onClick(DialogInterface dialog,
-                                        int which)
+                turnInfoContainer.color = new Color32(24, 0, 63, 255);
+                turnInfo.text = "Turn Ended!";
+                yield return new WaitForSeconds(7);
+                if (!eventTime)
+                {
+                    turnInfoContainer.color = Color.clear;
+                    turnInfo.text = "";
+                }
+            }
+        }
+    }
+
+
+    public void RollEvent()
     {
-        //Toast.makeText(getApplicationContext(),"Yes is clicked",Toast.LENGTH_LONG).show();
+        eventDisplayContainer.transform.localScale = new Vector3(1, 1, 1);
+        eventDisplay.transform.localScale = new Vector3(0.2486072f, 0.3635768f, 0.262286f);
+        dismissEvent.transform.localScale = new Vector3(1, 1, 1);
+        dismissEventText.transform.localScale = new Vector3(0.2678665f, 0.2678665f, 0.2678665f);
+        dismissEvent.interactable = true;
+
+        if (eventTime)
+        {
+            turnInfoContainer.color = Color.clear;
+            turnInfo.text = "";
+            string randomEvent = "";
+            switch (stageList.captionText.text)
+            {
+                case "Grassy Plains":
+                    randomEvent = grassyEvents[UnityEngine.Random.Range(0, grassyEvents.Length)];
+                    break;
+                case "Sandy Desert":
+                    randomEvent = sandyEvents[UnityEngine.Random.Range(0, sandyEvents.Length)];
+                    break;
+                case "Town Square":
+                    randomEvent = townEvents[UnityEngine.Random.Range(0, townEvents.Length)];
+                    break;
+                case "Beach Day":
+                    randomEvent = beachEvents[UnityEngine.Random.Range(0, beachEvents.Length)];
+                    break;
+                case "Enchanted Forest":
+                    randomEvent = enchantedForestEvents[UnityEngine.Random.Range(0, enchantedForestEvents.Length)];
+                    break;
+                case "Jungle":
+                    randomEvent = jungleEvents[UnityEngine.Random.Range(0, jungleEvents.Length)];
+                    break;
+                case "Volcano":
+                    randomEvent = volcanoEvents[UnityEngine.Random.Range(0, volcanoEvents.Length)];
+                    break;
+                case "Space Whale":
+                    randomEvent = spaceWhaleEvents[UnityEngine.Random.Range(0, spaceWhaleEvents.Length)];
+                    break;
+                case "Cave":
+                    randomEvent = caveEvents[UnityEngine.Random.Range(0, caveEvents.Length)];
+                    break;
+                case "Iceberg":
+                    randomEvent = icebergEvents[UnityEngine.Random.Range(0, icebergEvents.Length)];
+                    break;
+                case "Ocean":
+                    randomEvent = oceanEvents[UnityEngine.Random.Range(0, oceanEvents.Length)];
+                    break;
+                case "Atlantis":
+                    randomEvent = atlantisEvents[UnityEngine.Random.Range(0, atlantisEvents.Length)];
+                    break;
+                case "Kraken":
+                    randomEvent = krakenEvents[UnityEngine.Random.Range(0, krakenEvents.Length)];
+                    break;
+            }
+            
+            eventDisplay.text = stageList.captionText.text + "\n\n" + randomEvent;
+            eventTime = false;
+        }
+        else
+        {
+            eventDisplay.text = "\n\n\n\n\n\nFuck off lmao";
+            dismissEvent.interactable = true;
+        }
     }
-});
-AlertDialog alertDialog = dialog.create();
-alertDialog.show();
-    }
 
-    public void addBean(View view)
-{
-    TextView beanStorage = (TextView)findViewById(R.id.beanStorage);
-    String beansStr = beanStorage.getText().toString();
-    int beans = Integer.parseInt(beansStr);
-    beans++;
-    beanStorage.setText(Integer.toString(beans));
-}
-
-public void removeBean(View view)
-{
-    TextView beanStorage = (TextView)findViewById(R.id.beanStorage);
-    String beansStr = beanStorage.getText().toString();
-    int beans = Integer.parseInt(beansStr);
-    beans--;
-    beanStorage.setText(Integer.toString(beans));
-}
-
-public void rollD2(View view)
-{
-    Random rand = new Random();
-    int result = rand.nextInt(2) + 1;
-    ImageView res = (ImageView)findViewById(R.id.diceResult);
-    switch (result)
+    public void DismissEvent()
     {
-        case 1:
-            res.setBackgroundResource(R.drawable.one_num);
-            break;
-        case 2:
-            res.setBackgroundResource(R.drawable.two_num);
-            break;
+        eventDisplayContainer.transform.localScale = new Vector3(0, 0, 0);
+        eventDisplay.transform.localScale = new Vector3(0, 0, 0);
+        dismissEvent.transform.localScale = new Vector3(0, 0, 0);
+        dismissEventText.transform.localScale = new Vector3(0, 0, 0);
+        dismissEvent.interactable = false;
+        eventDisplay.text = "";
     }
-}
 
-public void rollD4(View view)
-{
-    Random rand = new Random();
-    int result = rand.nextInt(4) + 1;
-    ImageView res = (ImageView)findViewById(R.id.diceResult);
-    switch (result)
+
+    public void AddBean()
     {
-        case 1:
-            res.setBackgroundResource(R.drawable.one_num);
-            break;
-        case 2:
-            res.setBackgroundResource(R.drawable.two_num);
-            break;
-        case 3:
-            res.setBackgroundResource(R.drawable.three_num);
-            break;
-        case 4:
-            res.setBackgroundResource(R.drawable.four_num);
-            break;
+        ethBeans.text = "\n" + (int.Parse(ethBeans.text) + 1).ToString();
     }
-}
 
-public void rollD6(View view)
-{
-    Random rand = new Random();
-    int result = rand.nextInt(6) + 1;
-    ImageView res = (ImageView)findViewById(R.id.diceResult);
-    switch (result)
+    public void RemoveBean()
     {
-        case 1:
-            res.setBackgroundResource(R.drawable.one_num);
-            break;
-        case 2:
-            res.setBackgroundResource(R.drawable.two_num);
-            break;
-        case 3:
-            res.setBackgroundResource(R.drawable.three_num);
-            break;
-        case 4:
-            res.setBackgroundResource(R.drawable.four_num);
-            break;
-        case 5:
-            res.setBackgroundResource(R.drawable.five_num);
-            break;
-        case 6:
-            res.setBackgroundResource(R.drawable.six_num);
-            break;
+        ethBeans.text = "\n" + (int.Parse(ethBeans.text) - 1).ToString();
     }
-}
-
-public void rollD8(View view)
-{
-    Random rand = new Random();
-    int result = rand.nextInt(8) + 1;
-    ImageView res = (ImageView)findViewById(R.id.diceResult);
-    switch (result)
+    
+    public void RollD2()
     {
-        case 1:
-            res.setBackgroundResource(R.drawable.one_num);
-            break;
-        case 2:
-            res.setBackgroundResource(R.drawable.two_num);
-            break;
-        case 3:
-            res.setBackgroundResource(R.drawable.three_num);
-            break;
-        case 4:
-            res.setBackgroundResource(R.drawable.four_num);
-            break;
-        case 5:
-            res.setBackgroundResource(R.drawable.five_num);
-            break;
-        case 6:
-            res.setBackgroundResource(R.drawable.six_num);
-            break;
-        case 7:
-            res.setBackgroundResource(R.drawable.seven_num);
-            break;
-        case 8:
-            res.setBackgroundResource(R.drawable.eight_num);
-            break;
+        dieNumber = 2;
+        StartCoroutine("RollDie");
     }
-}
 
-public void addGold(View view)
-{
-    TextView gold = (TextView)findViewById(R.id.goldAmount);
-    int goldAmount = Integer.parseInt(gold.getText().toString());
-    goldAmount += 10;
-    gold.setText(Integer.toString(goldAmount));
-}
-
-public void removeGold(View view)
-{
-    TextView gold = (TextView)findViewById(R.id.goldAmount);
-    int goldAmount = Integer.parseInt(gold.getText().toString());
-    goldAmount -= 10;
-    gold.setText(Integer.toString(goldAmount));
-}
-
-public void changeStage(View view)
-{
-    ConstraintLayout background = (ConstraintLayout)findViewById(R.id.rollResults);
-    Spinner stage = (Spinner)findViewById(R.id.stageSpinner);
-    switch (stage.getSelectedItem().toString())
+    public void RollD4()
     {
-        case "Grassy Plains":
-            background.setBackgroundResource(R.drawable.grassy_plains);
-            break;
-        case "Sandy Desert":
-            background.setBackgroundResource(R.drawable.desert);
-            break;
-        case "Town Square":
-            background.setBackgroundResource(R.drawable.town_square);
-            break;
-        case "Beach Day":
-            background.setBackgroundResource(R.drawable.beach);
-            break;
-        case "Enchanted Forest":
-            background.setBackgroundResource(R.drawable.enchanted_forest);
-            break;
-        case "Jungle":
-            background.setBackgroundResource(R.drawable.jungle);
-            break;
-        case "Volcano":
-            background.setBackgroundResource(R.drawable.volcano);
-            break;
-        case "Space Whale":
-            background.setBackgroundResource(R.drawable.space);
-            break;
-        case "Cave":
-            background.setBackgroundResource(R.drawable.cave);
-            break;
-        case "Iceberg":
-            background.setBackgroundResource(R.drawable.iceberg);
-            break;
-        case "Ocean":
-            background.setBackgroundResource(R.drawable.ocean);
-            break;
-        case "Atlantis":
-            background.setBackgroundResource(R.drawable.atlantis);
-            break;
-        case "Kraken":
-            background.setBackgroundResource(R.drawable.kraken);
-            break;
+        dieNumber = 4;
+        StartCoroutine("RollDie");
     }
-}*/
+
+    public void RollD6()
+    {
+        dieNumber = 6;
+        StartCoroutine("RollDie");
+    }
+
+    public void RollD8()
+    {
+        dieNumber = 8;
+        StartCoroutine("RollDie");
+    }
+
+    IEnumerator RollDie()
+    {
+        diceRollDisplay.sprite = null;
+        diceRollDisplay.color = new Color32(255, 255, 255, 0);
+        yield return new WaitForSeconds(0.1f);
+        diceRollDisplay.color = new Color32(255, 255, 255, 255);
+        switch (UnityEngine.Random.Range(1, dieNumber + 1))
+        {
+            case 1:
+                diceRollDisplay.sprite = nums[0];
+                break;
+            case 2:
+                diceRollDisplay.sprite = nums[1];
+                break;
+            case 3:
+                diceRollDisplay.sprite = nums[2];
+                break;
+            case 4:
+                diceRollDisplay.sprite = nums[3];
+                break;
+            case 5:
+                diceRollDisplay.sprite = nums[4];
+                break;
+            case 6:
+                diceRollDisplay.sprite = nums[5];
+                break;
+            case 7:
+                diceRollDisplay.sprite = nums[6];
+                break;
+            case 8:
+                diceRollDisplay.sprite = nums[7];
+                break;
+        }
+    }
+    public void AddGold()
+    {
+        gold.text = (int.Parse(gold.text) + 1).ToString();
+    }
+
+    public void RemoveGold()
+    {
+        gold.text = (int.Parse(gold.text) - 1).ToString();
+    }
+
+    public void ChangeStage()
+    {
+        switch (stageList.captionText.text)
+        {
+            case "Grassy Plains":
+                background.sprite = backgrounds[5];
+                break;
+            case "Sandy Desert":
+                background.sprite = backgrounds[3];
+                break;
+            case "Town Square":
+                background.sprite = backgrounds[11];
+                break;
+            case "Beach Day":
+                background.sprite = backgrounds[1];
+                break;
+            case "Enchanted Forest":
+                background.sprite = backgrounds[4];
+                break;
+            case "Jungle":
+                background.sprite = backgrounds[7];
+                break;
+            case "Volcano":
+                background.sprite = backgrounds[12];
+                break;
+            case "Space Whale":
+                background.sprite = backgrounds[10];
+                break;
+            case "Cave":
+                background.sprite = backgrounds[2];
+                break;
+            case "Iceberg":
+                background.sprite = backgrounds[6];
+                break;
+            case "Ocean":
+                background.sprite = backgrounds[9];
+                break;
+            case "Atlantis":
+                background.sprite = backgrounds[0];
+                break;
+            case "Kraken":
+                background.sprite = backgrounds[8];
+                break;
+        }
+    }
 }
