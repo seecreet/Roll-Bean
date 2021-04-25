@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
+using MLAPI;
 
 public class GameManager : MonoBehaviour
 {
@@ -41,13 +42,18 @@ public class GameManager : MonoBehaviour
     public Text eventDisplay;
     public Text dismissEventText;
 
-    public Image charSprite;
+    public Player player;
+
+    public SpriteRenderer playerSprite;
+
     public Image turnInfoContainer;
     public Image eventDisplayContainer;
     public Image diceRollDisplay;
     public Image background;
 
     public Dropdown stageList;
+
+    public Player playerPrefab;
 
     string[] stages;
     string[] grassyEvents;
@@ -71,6 +77,7 @@ public class GameManager : MonoBehaviour
     int dieNumber;
 
     bool eventTime = false;
+    bool isDead = true;
 
     // Start is called before the first frame update
     void Start()
@@ -197,73 +204,95 @@ public class GameManager : MonoBehaviour
     
     public void RollChar()
     {
-        string raceStr = "";
-        string heightStr = " Feet";
-        string speedStr = UnityEngine.Random.Range(1,11).ToString();
-        switch (UnityEngine.Random.Range(1,9))
+        if (isDead == true)
         {
-            case 1:
-                raceStr = "Gnome";
-                charSprite.sprite = raceSprites[0];
-                heightStr = "1 Foot";
-                break;
-            case 2:
-                raceStr = "Goblin";
-                charSprite.sprite = raceSprites[1];
-                heightStr = "2" + heightStr;
-                break;
-            case 3:
-                raceStr = "Halfling";
-                charSprite.sprite = raceSprites[2];
-                heightStr = "3" + heightStr;
-                break;
-            case 4:
-                raceStr = "Dwarf";
-                charSprite.sprite = raceSprites[3];
-                heightStr = "4" + heightStr;
-                break;
-            case 5:
-                raceStr = "Human";
-                charSprite.sprite = raceSprites[4];
-                heightStr = "5" + heightStr;
-                break;
-            case 6:
-                raceStr = "Human";
-                charSprite.sprite = raceSprites[5];
-                heightStr = "6" + heightStr;
-                break;
-            case 7:
-                raceStr = "Elf";
-                charSprite.sprite = raceSprites[6];
-                heightStr = "7" + heightStr;
-                break;
-            case 8:
-                raceStr = "Goliath";
-                charSprite.sprite = raceSprites[7];
-                heightStr = "8" + heightStr;
-                break;
-        }
+            player = Instantiate(playerPrefab, new Vector3(165f, 1044f, 0f), Quaternion.identity);
+            isDead = false;
+            player.transform.localScale = new Vector3(54.2839f, 89.25624f, 252.6304f);
+            playerSprite = player.GetComponent<SpriteRenderer>();
+            int raceCase = UnityEngine.Random.Range(1, 9);
+            string raceBuffer;
 
-        health.text = "30";
-        speed.text = speedStr;
-        height.text = heightStr;
-        race.text = raceStr;
+            switch (raceCase)
+            {
+                case 1:
+                    raceBuffer = "Gnome";
+                    playerSprite.sprite = raceSprites[0];
+                    break;
+                case 2:
+                    raceBuffer = "Goblin";
+                    playerSprite.sprite = raceSprites[1];
+                    break;
+                case 3:
+                    raceBuffer = "Halfling";
+                    playerSprite.sprite = raceSprites[2];
+                    break;
+                case 4:
+                    raceBuffer = "Dwarf";
+                    playerSprite.sprite = raceSprites[3];
+                    break;
+                case 5:
+                    raceBuffer = "Human";
+                    playerSprite.sprite = raceSprites[4];
+                    break;
+                case 6:
+                    raceBuffer = "Human";
+                    playerSprite.sprite = raceSprites[5];
+                    break;
+                case 7:
+                    raceBuffer = "Elf";
+                    playerSprite.sprite = raceSprites[6];
+                    break;
+                case 8:
+                    raceBuffer = "Goliath";
+                    playerSprite.sprite = raceSprites[7];
+                    break;
+                default:
+                    raceBuffer = "";
+                    break;
+            }
+
+            player.SetAll(5, UnityEngine.Random.Range(1, 11), raceCase, raceBuffer);
+
+            health.text = player.health.ToString();
+            speed.text = player.speed.ToString();
+            if (player.height == 1) height.text = "1 foot";
+            else height.text = player.height.ToString() + " feet";
+            race.text = player.race;
+        }
     }
     
     public void HpUp()
     {
-        if (health.text != "")
+        if (player.health > 0)
         {
-            health.text = (int.Parse(health.text) + 1).ToString();
+            player.health += 1;
+            health.text = player.health.ToString();
         }
     }
 
     public void HpDown()
     {
-        if (health.text != "")
+        if (player.health > 0)
         {
-            health.text = (int.Parse(health.text) - 1).ToString();
+            player.health -= 1;
+            health.text = player.health.ToString();
+            if(player.health == 0)
+            {
+                PlayerDeath();
+            }
         }
+    }
+
+    public void PlayerDeath()
+    {
+        player.GetComponent<SpriteRenderer>().transform.localScale = Vector3.zero;
+        GameObject.Destroy(player);
+        isDead = true;
+        health.text = "";
+        speed.text = "";
+        height.text = "";
+        race.text = "";
     }
     
     public void EndTurn() { StartCoroutine("DisplayEndTurn"); }
