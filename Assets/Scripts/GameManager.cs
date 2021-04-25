@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
@@ -8,6 +9,36 @@ public class GameManager : MonoBehaviour
 {
     public TextAsset table;
     public string[] rolls;
+
+    public Sprite[] raceSprites;
+
+    public Button hPUp;
+    public Button hPDown;
+    public Button goldUp;
+    public Button goldDown;
+    public Button endTurn;
+    public Button rollCharacter;
+    public Button D2;
+    public Button D4;
+    public Button D6;
+    public Button D8;
+    public Button rollBean;
+    public Button ethBeanUp;
+    public Button ethBeanDown;
+    public Button rollEvent;
+
+    public Text race;
+    public Text height;
+    public Text currentTurnBox;
+    public Text health;
+    public Text speed;
+    public Text gold;
+    public Text ethBeans;
+    public Text eventLog;
+
+    public Image charSprite;
+
+    public Dropdown stageList;
 
     string[] stages;
     string[] grassyEvents;
@@ -24,6 +55,10 @@ public class GameManager : MonoBehaviour
     string[] enchantedForestEvents;
     string[] jungleEvents;
     string[] hellEvents;
+
+    int turn;
+    int currentTurn = 1;
+    int totalPlayers;
 
     // Start is called before the first frame update
     void Start()
@@ -139,4 +174,354 @@ public class GameManager : MonoBehaviour
             "Fraud, roll 1d9: \n1.Whipped by demons 6dmg. \n2.Steeped in excrement 6dmg. \n3.Placed in holes head first with their legs exposed and burned 6dmg. \n4.Contorted until their heads are half backward, death. \n5.Soul burns wrapped in columns of flame 7dmg. \n6.Suffer from fever and headache 2dmg. \n7.Disfigured by dropsy and exhausted by thirst 6dmg. \n8.Relaxed compelled to scratch their itching skin, you just itchy. \n9.Forced to wear cloaks of lead(speed 0, all you can do is roll bean).\n10.Split from chin to groin by sword death ",
             "Treachery frozen waste land last one standing gets 2 extra beans in their ethereal storage, the party then respawns in a random land stage."};
     }
+    
+    public void RollBean()
+    {
+        int roll = UnityEngine.Random.Range(0, 10000);
+        eventLog.text = (rolls[roll] + "\n" + eventLog.text);
+    }
+    
+    public void RollChar()
+    {
+        string raceStr = "";
+        string heightStr = " Feet";
+        string speedStr = UnityEngine.Random.Range(1,11).ToString();
+        switch (UnityEngine.Random.Range(1,9))
+        {
+            case 1:
+                raceStr = "Gnome";
+                charSprite.sprite = raceSprites[0];
+                heightStr = "1 Foot";
+                break;
+            case 2:
+                raceStr = "Goblin";
+                charSprite.sprite = raceSprites[1];
+                heightStr = "2" + heightStr;
+                break;
+            case 3:
+                raceStr = "Halfling";
+                charSprite.sprite = raceSprites[2];
+                heightStr = "3" + heightStr;
+                break;
+            case 4:
+                raceStr = "Dwarf";
+                charSprite.sprite = raceSprites[3];
+                heightStr = "4" + heightStr;
+                break;
+            case 5:
+                raceStr = "Human";
+                charSprite.sprite = raceSprites[4];
+                heightStr = "5" + heightStr;
+                break;
+            case 6:
+                raceStr = "Human";
+                charSprite.sprite = raceSprites[5];
+                heightStr = "6" + heightStr;
+                break;
+            case 7:
+                raceStr = "Elf";
+                charSprite.sprite = raceSprites[6];
+                heightStr = "7" + heightStr;
+                break;
+            case 8:
+                raceStr = "Goliath";
+                charSprite.sprite = raceSprites[7];
+                heightStr = "8" + heightStr;
+                break;
+        }
+
+        health.text = "30";
+        speed.text = speedStr;
+        height.text = heightStr;
+        race.text = raceStr;
+    }
+    
+    public void hpUp()
+    {
+        if (health.text != "")
+        {
+            health.text = (int.Parse(health.text) + 1).ToString();
+        }
+    }
+
+    public void hpDown()
+    {
+        if (health.text != "")
+        {
+            health.text = (int.Parse(health.text) - 1).ToString();
+        }
+    }
+    /*
+    public void endTurn(View view)
+    {
+        Toast.makeText(getApplicationContext(), "Turn Ended Successfully!", Toast.LENGTH_LONG).show();
+        if (currentTurn == 1)
+            currentTurn = totalPlayers;
+        else
+            currentTurn--;
+        if (currentTurn == turn)
+        {
+            AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+            dialog.setMessage("It's your turn to roll the event!");
+            dialog.setTitle("Event Time!");
+            dialog.setPositiveButton("Okay..",
+                    new DialogInterface.OnClickListener()
+                    {
+                        public void onClick(DialogInterface dialog,
+                                            int which)
+            {
+                //Toast.makeText(getApplicationContext(),"Yes is clicked",Toast.LENGTH_LONG).show();
+            }
+        });
+        AlertDialog alertDialog = dialog.create();
+        alertDialog.show();
+    }
+    TextView currTurn = (TextView)findViewById(R.id.currentTurn);
+    currTurn.setText(Integer.toString(currentTurn));
+    }
+
+public void rollEvent(View view)
+{
+    Random rand = new Random();
+    Spinner stage = (Spinner)findViewById(R.id.stageSpinner);
+    String event = "";
+    switch (stage.getSelectedItem().toString())
+    {
+        case "Grassy Plains":
+                event = grassyEvents[rand.nextInt(grassyEvents.length)];
+            break;
+        case "Sandy Desert":
+                event = sandyEvents[rand.nextInt(sandyEvents.length)];
+            break;
+        case "Town Square":
+                event = townEvents[rand.nextInt(townEvents.length)];
+            break;
+        case "Beach Day":
+                event = beachEvents[rand.nextInt(beachEvents.length)];
+            break;
+        case "Enchanted Forest":
+                event = enchantedForestEvents[rand.nextInt(enchantedForestEvents.length)];
+            break;
+        case "Jungle":
+                event = jungleEvents[rand.nextInt(jungleEvents.length)];
+            break;
+        case "Volcano":
+                event = volcanoEvents[rand.nextInt(volcanoEvents.length)];
+            break;
+        case "Space Whale":
+                event = spaceWhaleEvents[rand.nextInt(spaceWhaleEvents.length)];
+            break;
+        case "Cave":
+                event = caveEvents[rand.nextInt(caveEvents.length)];
+            break;
+        case "Iceberg":
+                event = icebergEvents[rand.nextInt(icebergEvents.length)];
+            break;
+        case "Ocean":
+                event = oceanEvents[rand.nextInt(oceanEvents.length)];
+            break;
+        case "Atlantis":
+                event = atlantisEvents[rand.nextInt(atlantisEvents.length)];
+            break;
+        case "Kraken":
+                event = krakenEvents[rand.nextInt(krakenEvents.length)];
+            break;
+    }
+    AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+    dialog.setMessage(event);
+    dialog.setTitle(stage.getSelectedItem().toString());
+    dialog.setPositiveButton("Got It.",
+            new DialogInterface.OnClickListener()
+            {
+                    public void onClick(DialogInterface dialog,
+                                        int which)
+    {
+        //Toast.makeText(getApplicationContext(),"Yes is clicked",Toast.LENGTH_LONG).show();
+    }
+});
+AlertDialog alertDialog = dialog.create();
+alertDialog.show();
+    }
+
+    public void addBean(View view)
+{
+    TextView beanStorage = (TextView)findViewById(R.id.beanStorage);
+    String beansStr = beanStorage.getText().toString();
+    int beans = Integer.parseInt(beansStr);
+    beans++;
+    beanStorage.setText(Integer.toString(beans));
+}
+
+public void removeBean(View view)
+{
+    TextView beanStorage = (TextView)findViewById(R.id.beanStorage);
+    String beansStr = beanStorage.getText().toString();
+    int beans = Integer.parseInt(beansStr);
+    beans--;
+    beanStorage.setText(Integer.toString(beans));
+}
+
+public void rollD2(View view)
+{
+    Random rand = new Random();
+    int result = rand.nextInt(2) + 1;
+    ImageView res = (ImageView)findViewById(R.id.diceResult);
+    switch (result)
+    {
+        case 1:
+            res.setBackgroundResource(R.drawable.one_num);
+            break;
+        case 2:
+            res.setBackgroundResource(R.drawable.two_num);
+            break;
+    }
+}
+
+public void rollD4(View view)
+{
+    Random rand = new Random();
+    int result = rand.nextInt(4) + 1;
+    ImageView res = (ImageView)findViewById(R.id.diceResult);
+    switch (result)
+    {
+        case 1:
+            res.setBackgroundResource(R.drawable.one_num);
+            break;
+        case 2:
+            res.setBackgroundResource(R.drawable.two_num);
+            break;
+        case 3:
+            res.setBackgroundResource(R.drawable.three_num);
+            break;
+        case 4:
+            res.setBackgroundResource(R.drawable.four_num);
+            break;
+    }
+}
+
+public void rollD6(View view)
+{
+    Random rand = new Random();
+    int result = rand.nextInt(6) + 1;
+    ImageView res = (ImageView)findViewById(R.id.diceResult);
+    switch (result)
+    {
+        case 1:
+            res.setBackgroundResource(R.drawable.one_num);
+            break;
+        case 2:
+            res.setBackgroundResource(R.drawable.two_num);
+            break;
+        case 3:
+            res.setBackgroundResource(R.drawable.three_num);
+            break;
+        case 4:
+            res.setBackgroundResource(R.drawable.four_num);
+            break;
+        case 5:
+            res.setBackgroundResource(R.drawable.five_num);
+            break;
+        case 6:
+            res.setBackgroundResource(R.drawable.six_num);
+            break;
+    }
+}
+
+public void rollD8(View view)
+{
+    Random rand = new Random();
+    int result = rand.nextInt(8) + 1;
+    ImageView res = (ImageView)findViewById(R.id.diceResult);
+    switch (result)
+    {
+        case 1:
+            res.setBackgroundResource(R.drawable.one_num);
+            break;
+        case 2:
+            res.setBackgroundResource(R.drawable.two_num);
+            break;
+        case 3:
+            res.setBackgroundResource(R.drawable.three_num);
+            break;
+        case 4:
+            res.setBackgroundResource(R.drawable.four_num);
+            break;
+        case 5:
+            res.setBackgroundResource(R.drawable.five_num);
+            break;
+        case 6:
+            res.setBackgroundResource(R.drawable.six_num);
+            break;
+        case 7:
+            res.setBackgroundResource(R.drawable.seven_num);
+            break;
+        case 8:
+            res.setBackgroundResource(R.drawable.eight_num);
+            break;
+    }
+}
+
+public void addGold(View view)
+{
+    TextView gold = (TextView)findViewById(R.id.goldAmount);
+    int goldAmount = Integer.parseInt(gold.getText().toString());
+    goldAmount += 10;
+    gold.setText(Integer.toString(goldAmount));
+}
+
+public void removeGold(View view)
+{
+    TextView gold = (TextView)findViewById(R.id.goldAmount);
+    int goldAmount = Integer.parseInt(gold.getText().toString());
+    goldAmount -= 10;
+    gold.setText(Integer.toString(goldAmount));
+}
+
+public void changeStage(View view)
+{
+    ConstraintLayout background = (ConstraintLayout)findViewById(R.id.rollResults);
+    Spinner stage = (Spinner)findViewById(R.id.stageSpinner);
+    switch (stage.getSelectedItem().toString())
+    {
+        case "Grassy Plains":
+            background.setBackgroundResource(R.drawable.grassy_plains);
+            break;
+        case "Sandy Desert":
+            background.setBackgroundResource(R.drawable.desert);
+            break;
+        case "Town Square":
+            background.setBackgroundResource(R.drawable.town_square);
+            break;
+        case "Beach Day":
+            background.setBackgroundResource(R.drawable.beach);
+            break;
+        case "Enchanted Forest":
+            background.setBackgroundResource(R.drawable.enchanted_forest);
+            break;
+        case "Jungle":
+            background.setBackgroundResource(R.drawable.jungle);
+            break;
+        case "Volcano":
+            background.setBackgroundResource(R.drawable.volcano);
+            break;
+        case "Space Whale":
+            background.setBackgroundResource(R.drawable.space);
+            break;
+        case "Cave":
+            background.setBackgroundResource(R.drawable.cave);
+            break;
+        case "Iceberg":
+            background.setBackgroundResource(R.drawable.iceberg);
+            break;
+        case "Ocean":
+            background.setBackgroundResource(R.drawable.ocean);
+            break;
+        case "Atlantis":
+            background.setBackgroundResource(R.drawable.atlantis);
+            break;
+        case "Kraken":
+            background.setBackgroundResource(R.drawable.kraken);
+            break;
+    }
+}*/
 }
