@@ -252,7 +252,7 @@ public class GameManager : MonoBehaviour
                     break;
             }
 
-            player.SetAll(5, UnityEngine.Random.Range(1, 11), raceCase, raceBuffer);
+            player.SetAll(30, UnityEngine.Random.Range(1, 11), raceCase, raceBuffer);
 
             health.text = player.health.ToString();
             speed.text = player.speed.ToString();
