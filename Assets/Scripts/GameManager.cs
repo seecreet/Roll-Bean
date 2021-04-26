@@ -84,6 +84,8 @@ public class GameManager : MonoBehaviour
     {
         setStagesEvents();
 
+        player = Instantiate(playerPrefab, new Vector3(165f, 1044f, 0f), Quaternion.identity);
+
         int counter = 0;
         rolls = new string[10001];
         StringBuilder singleLine = new StringBuilder();
@@ -206,7 +208,7 @@ public class GameManager : MonoBehaviour
     {
         if (isDead == true)
         {
-            player = Instantiate(playerPrefab, new Vector3(165f, 1044f, 0f), Quaternion.identity);
+            
             isDead = false;
             player.transform.localScale = new Vector3(54.2839f, 89.25624f, 252.6304f);
             playerSprite = player.GetComponent<SpriteRenderer>();
@@ -287,7 +289,6 @@ public class GameManager : MonoBehaviour
     public void PlayerDeath()
     {
         player.GetComponent<SpriteRenderer>().transform.localScale = Vector3.zero;
-        GameObject.Destroy(player);
         isDead = true;
         health.text = "";
         speed.text = "";
