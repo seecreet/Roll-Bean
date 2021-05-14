@@ -1,9 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using MLAPI;
+using Mirror;
 
-public class Player : NetworkBehaviour
+public class Player : MonoBehaviour
 {
     public int health;
     public int speed;
@@ -22,6 +22,7 @@ public class Player : NetworkBehaviour
     {
         
     }
+
 
     public void SetAll(int hp, int sp, int hei, string rac)
     {

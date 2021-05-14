@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
-using MLAPI;
+using Mirror;
 
 public class GameManager : MonoBehaviour
 {
@@ -43,17 +43,18 @@ public class GameManager : MonoBehaviour
     public Text dismissEventText;
 
     public Player player;
+    public GameObject playerShell;
 
     public SpriteRenderer playerSprite;
+    public SpriteRenderer background;
 
     public Image turnInfoContainer;
     public Image eventDisplayContainer;
     public Image diceRollDisplay;
-    public Image background;
 
     public Dropdown stageList;
 
-    public Player playerPrefab;
+    public GameObject playerPrefab;
 
     string[] stages;
     string[] grassyEvents;
@@ -84,8 +85,6 @@ public class GameManager : MonoBehaviour
     {
         setStagesEvents();
 
-        player = Instantiate(playerPrefab, new Vector3(165f, 1044f, 0f), Quaternion.identity);
-
         int counter = 0;
         rolls = new string[10001];
         StringBuilder singleLine = new StringBuilder();
@@ -109,7 +108,7 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        if (NetworkServer.active) if (isDead) { SpawnPlayer(); }
     }
 
     void setStagesEvents()
@@ -203,12 +202,16 @@ public class GameManager : MonoBehaviour
         int roll = UnityEngine.Random.Range(0, 10000);
         eventLog.text = (rolls[roll] + "\n" + eventLog.text);
     }
-    
+
     public void RollChar()
     {
-        if (isDead == true)
+        SpawnPlayer();
+        /*if (isDead == true)
         {
-            
+            player = Instantiate(playerPrefab, new Vector3(165f, 1044f, 0f), Quaternion.identity);
+            player.transform.position = new Vector3(-1387f, 841, 0);
+            //player.transform.localScale = new Vector3(55, 108, 0);
+
             isDead = false;
             player.transform.localScale = new Vector3(54.2839f, 89.25624f, 252.6304f);
             playerSprite = player.GetComponent<SpriteRenderer>();
@@ -261,9 +264,77 @@ public class GameManager : MonoBehaviour
             if (player.height == 1) height.text = "1 foot";
             else height.text = player.height.ToString() + " feet";
             race.text = player.race;
-        }
+        }*/
     }
-    
+
+    public void SpawnPlayer()
+    {
+        //if (isDead == true)
+        //{
+            playerShell = Instantiate(playerPrefab, new Vector3(165f, 1044f, 0f), Quaternion.identity);
+            player = playerShell.GetComponentInChildren<Player>();
+            
+            
+
+            isDead = false;
+            
+            playerSprite = player.GetComponent<SpriteRenderer>();
+            int raceCase = UnityEngine.Random.Range(1, 9);
+            string raceBuffer;
+
+            switch (raceCase)
+            {
+                case 1:
+                    raceBuffer = "Gnome";
+                    playerSprite.sprite = raceSprites[0];
+                    break;
+                case 2:
+                    raceBuffer = "Goblin";
+                    playerSprite.sprite = raceSprites[1];
+                    break;
+                case 3:
+                    raceBuffer = "Halfling";
+                    playerSprite.sprite = raceSprites[2];
+                    break;
+                case 4:
+                    raceBuffer = "Dwarf";
+                    playerSprite.sprite = raceSprites[3];
+                    break;
+                case 5:
+                    raceBuffer = "Human";
+                    playerSprite.sprite = raceSprites[4];
+                    break;
+                case 6:
+                    raceBuffer = "Human";
+                    playerSprite.sprite = raceSprites[5];
+                    break;
+                case 7:
+                    raceBuffer = "Elf";
+                    playerSprite.sprite = raceSprites[6];
+                    break;
+                case 8:
+                    raceBuffer = "Goliath";
+                    playerSprite.sprite = raceSprites[7];
+                    break;
+                default:
+                    raceBuffer = "";
+                    break;
+            }
+
+            player.SetAll(30, UnityEngine.Random.Range(1, 11), raceCase, raceBuffer);
+
+            health.text = player.health.ToString();
+            speed.text = player.speed.ToString();
+            if (player.height == 1) height.text = "1 foot";
+            else height.text = player.height.ToString() + " feet";
+            race.text = player.race;
+
+            NetworkServer.Spawn(playerShell);
+            playerShell.transform.localScale = new Vector3(54.2839f, 89.25624f, 252.6304f);
+            playerShell.transform.position = new Vector3(-1387f, 841, 0);
+        //}
+    }
+
     public void HpUp()
     {
         if (player.health > 0)
@@ -288,12 +359,14 @@ public class GameManager : MonoBehaviour
 
     public void PlayerDeath()
     {
-        player.GetComponent<SpriteRenderer>().transform.localScale = Vector3.zero;
+        //Destroy(playerShell.gameObject);
+        NetworkServer.Destroy(playerShell);
         isDead = true;
+        /*player.GetComponent<SpriteRenderer>().transform.localScale = Vector3.zero;
         health.text = "";
         speed.text = "";
         height.text = "";
-        race.text = "";
+        race.text = "";*/
     }
     
     public void EndTurn() { StartCoroutine("DisplayEndTurn"); }
